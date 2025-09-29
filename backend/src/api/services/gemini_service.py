@@ -1,7 +1,7 @@
 import requests
 import time
-from ..core.config import settings
-from ..core.logging import logger
+from ...core.config import settings
+from ...core.logging import logger
 from ...graphs.prompt_template import GENERATE_TWEET_PROMPT
 
 MAX_RETRIES = 3
