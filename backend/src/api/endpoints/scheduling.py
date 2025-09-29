@@ -1,23 +1,24 @@
-from fastapi import APIRouter, HTTPException
-from ...api.services.storage_service import StorageService
+from fastapi import APIRouter, HTTPException, Depends
+from typing import List
+from sqlmodel import Session
+from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...api.services.twitter_service import schedule_post
 from ...core.logging import logger
-
+from ...main import get_storage_service
 
 router = APIRouter()
-storage = StorageService()
 
 @router.post("/schedule/{post_id}")
-async def schedule_specific_post(post_id: str):
+async def schedule_specific_post(post_id: str, storage: PostgreSQLStorageService = Depends(get_storage_service)):
     """
     Schedules a specific approved post to Twitter.
     """
-    post = storage.get_post(post_id)
-    if not post or not post["approved"]:
+    post = await storage.get_post(post_id)
+    if not post or not post.approved:
         raise HTTPException(status_code=400, detail="Post not approved or not found")
     try:
-        schedule_post(post["content"])
-        storage.update_post(post_id, scheduled=True)
+        await schedule_post(post.content)
+        await storage.update_post(post_id, scheduled=True)
         logger.info(f"Scheduled post ID: {post_id}")
         return {"success": True}
     except Exception as e:
@@ -25,16 +26,16 @@ async def schedule_specific_post(post_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/schedule_trigger")
-async def daily_schedule_trigger():
+async def daily_schedule_trigger(storage: PostgreSQLStorageService = Depends(get_storage_service)):
     """
     Triggered daily (e.g., by Cloud Scheduler) to schedule all approved and unscheduled posts.
     """
-    approved_posts = storage.get_approved_posts()
+    approved_posts = await storage.get_approved_posts()
     for post in approved_posts:
         try:
-            schedule_post(post["content"])
-            storage.update_post(post["id"], scheduled=True)
-            logger.info(f"Scheduled post ID: {post['id']} via daily trigger")
+            await schedule_post(post.content)
+            await storage.update_post(post.id, scheduled=True)
+            logger.info(f"Scheduled post ID: {post.id} via daily trigger")
         except Exception as e:
-            logger.error(f"Error in daily scheduling for post {post['id']}: {str(e)}")
+            logger.error(f"Error in daily scheduling for post {post.id}: {str(e)}")
     return {"success": True, "posts_scheduled": len(approved_posts)}

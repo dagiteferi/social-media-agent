@@ -1,15 +1,17 @@
-from fastapi import APIRouter
-from ...api.services.storage_service import StorageService
+from fastapi import APIRouter, Depends
+from typing import List, Dict
+from sqlmodel import Session
+from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...core.logging import logger
+from ...main import get_storage_service
 
 router = APIRouter()
-storage = StorageService()
 
-@router.get("/metrics")
-async def get_metrics():
+@router.get("/metrics", response_model=List[Dict])
+async def get_metrics(storage: PostgreSQLStorageService = Depends(get_storage_service)):
     """
     Retrieves mock engagement metrics for all posts.
     """
-    metrics = storage.get_metrics()
+    metrics = await storage.get_metrics()
     logger.info(f"Retrieved metrics for {len(metrics)} posts")
     return metrics
