@@ -1,7 +1,7 @@
 import requests
 import time
-from ..core.config import settings
-from ..core.logging import logger
+from ...core.config import settings
+from ...core.logging import logger
 
 MAX_RETRIES = 3
 INITIAL_BACKOFF = 1  # seconds

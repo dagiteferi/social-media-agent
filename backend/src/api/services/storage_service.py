@@ -1,7 +1,7 @@
 import uuid
 import random
 from typing import List, Dict
-from ..core.logging import logger
+from ...core.logging import logger
 from ..models.models import Post
 
 class StorageService:
