@@ -26,13 +26,14 @@ def schedule_post(content: str):
             logger.info(f"Scheduled post: {content[:50]}...")
             return response.json()
         except requests.exceptions.RequestException as e:
-            logger.warning(f"Twitter API request failed (attempt {attempt + 1}/{MAX_RETRIES}): {str(e)}")
+            error_detail = f"Status: {e.response.status_code}, Response: {e.response.text}" if e.response else str(e)
+            logger.warning(f"Twitter API request failed (attempt {attempt + 1}/{MAX_RETRIES}): {error_detail}")
             if attempt < MAX_RETRIES - 1:
                 sleep_time = INITIAL_BACKOFF * (2 ** attempt)
                 logger.info(f"Retrying in {sleep_time} seconds...")
                 time.sleep(sleep_time)
             else:
-                logger.error(f"Twitter API request failed after {MAX_RETRIES} attempts: {str(e)}")
+                logger.error(f"Twitter API request failed after {MAX_RETRIES} attempts: {error_detail}")
                 # Mock response for testing or rate limit handling
                 return {"status": "Mocked scheduling due to API limitations", "content": content}
         except Exception as e:
