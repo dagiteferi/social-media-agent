@@ -17,5 +17,5 @@ Use the following context & variables:
 Write **exactly one** tweet. No threads. Keep it under 280 characters.
 
 Example output:  
-“Meet the {product_or_offer} from {brand_name} — {unique_benefit}! Transform your {audience} experience. Limited stock available. Grab yours now → {cta} #YourBrand”  
+“ Meet the {product_or_offer} from {brand_name} — {unique_benefit}! Transform your {audience_description} experience. Limited stock available. Grab yours now → {cta} #YourBrand”  
 """
