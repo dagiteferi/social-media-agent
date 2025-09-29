@@ -3,9 +3,7 @@ import time
 from ...core.config import settings
 from ...core.logging import logger
 from ...graphs.prompt_template import GENERATE_TWEET_PROMPT
-
-MAX_RETRIES = 3
-INITIAL_BACKOFF = 1  # seconds
+from .api_config import MAX_RETRIES, INITIAL_BACKOFF, GEMINI_API_URL
 
 def generate_content(prompt: str) -> str:
     """
@@ -19,7 +17,7 @@ def generate_content(prompt: str) -> str:
     """
     for attempt in range(MAX_RETRIES):
         try:
-            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+            url = GEMINI_API_URL
             params = {"key": settings.GEMINI_API_KEY}
             json_data = {
                 "contents": [{"parts": [{"text": GENERATE_TWEET_PROMPT.format(

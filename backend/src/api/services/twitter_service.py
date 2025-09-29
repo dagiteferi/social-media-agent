@@ -2,9 +2,7 @@ import requests
 import time
 from ...core.config import settings
 from ...core.logging import logger
-
-MAX_RETRIES = 3
-INITIAL_BACKOFF = 1  # seconds
+from .api_config import MAX_RETRIES, INITIAL_BACKOFF, TWITTER_API_URL, get_twitter_headers
 
 def schedule_post(content: str):
     """
@@ -20,11 +18,8 @@ def schedule_post(content: str):
     """
     for attempt in range(MAX_RETRIES):
         try:
-            url = "https://api.twitter.com/2/tweets"
-            headers = {
-                "Authorization": f"Bearer {settings.TWITTER_BEARER_TOKEN}",
-                "Content-Type": "application/json"
-            }
+            url = TWITTER_API_URL
+            headers = get_twitter_headers()
             json_data = {"text": content}
             response = requests.post(url, headers=headers, json=json_data, timeout=10) # Increased timeout
             response.raise_for_status()
