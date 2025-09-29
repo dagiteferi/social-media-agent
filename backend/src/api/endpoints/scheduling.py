@@ -1,10 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
-from sqlmodel import Session
 from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...api.services.twitter_service import schedule_post
 from ...core.logging import logger
-from ...main import get_storage_service
+from ..dependencies import get_storage_service
 
 router = APIRouter()
 

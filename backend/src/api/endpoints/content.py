@@ -1,12 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from pydantic import BaseModel
-from sqlmodel import Session
 from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...graphs import generate_content_workflow
 from ...core.logging import logger
 from ...api.models.post import Post
-from ...main import get_storage_service
+from ..dependencies import get_storage_service
 
 router = APIRouter()
 

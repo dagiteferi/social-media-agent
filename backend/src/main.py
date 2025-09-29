@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
 from .api.endpoints import analytics, content, scheduling
-from .api.services.postgresql_storage_service import PostgreSQLStorageService
-from .core.database import create_db_and_tables, get_session
+from .core.database import create_db_and_tables
+from .api.dependencies import get_storage_service
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,10 +14,6 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="E-Commerce Social Media Agent Backend", version="1.0.0", lifespan=lifespan)
-
-
-def get_storage_service(session: Session = Depends(get_session)) -> PostgreSQLStorageService:
-    return PostgreSQLStorageService(session=session)
 
 
 app.add_middleware(

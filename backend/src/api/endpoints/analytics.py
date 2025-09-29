@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 from typing import List, Dict
-from sqlmodel import Session
 from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...core.logging import logger
-from ...main import get_storage_service
+from ..dependencies import get_storage_service
 
 router = APIRouter()
 
