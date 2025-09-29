@@ -22,8 +22,13 @@ def generate_content(prompt: str) -> str:
             url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
             params = {"key": settings.GEMINI_API_KEY}
             json_data = {
-                "contents": [{"parts": [{"text": GENERATE_TWEET_PROMPT.format(prompt=prompt)}
-]}],
+                "contents": [{"parts": [{"text": GENERATE_TWEET_PROMPT.format(
+                    brand_name="Your E-commerce Brand",
+                    product_or_offer=prompt,
+                    audience_description="online shoppers",
+                    unique_benefit="unbeatable quality",
+                    cta="Shop Now!"
+                )}]}],
                 "generationConfig": {"maxOutputTokens": 280},
             }
             response = requests.post(url, params=params, json=json_data, timeout=10) # Increased timeout
