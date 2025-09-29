@@ -2,11 +2,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 from .core.config import settings
-from .services.storage_service import StorageService
-from .graphs.content_graph import generate_content_workflow
-from .services.twitter_service import schedule_post
+from .api.services.storage_service import StorageService
+from .graphs.content_graphs import generate_content_workflow
+from .api.services.twitter_service import schedule_post
 from .core.logging import logger
 from fastapi.middleware.cors import CORSMiddleware
+from .models import Post
 
 app = FastAPI(title="E-Commerce Social Media Agent Backend", version="1.0.0")
 storage = StorageService()
@@ -21,12 +22,6 @@ app.add_middleware(
 
 class PromptRequest(BaseModel):
     prompt: str
-
-class Post(BaseModel):
-    id: str
-    content: str
-    approved: bool = False
-    scheduled: bool = False
 
 @app.post("/generate", response_model=Post)
 async def generate_post(request: PromptRequest):

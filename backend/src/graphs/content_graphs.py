@@ -1,12 +1,7 @@
 from langgraph.graph import StateGraph, END
-from typing import TypedDict, Optional
-from ..services.gemini_service import generate_content
+from ..api.services.gemini_service import generate_content
 from ..core.logging import logger
-
-class ContentState(TypedDict):
-    prompt: str
-    content: Optional[str]
-    error: Optional[str]
+from ..models import ContentState
 
 def generate_node(state: ContentState) -> ContentState:
     logger.info(f"Executing generate_node with prompt: {state['prompt']}")

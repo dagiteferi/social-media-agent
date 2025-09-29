@@ -1,14 +1,8 @@
 import uuid
 import random
 from typing import List, Dict
-from pydantic import BaseModel
 from ..core.logging import logger
-
-class Post(BaseModel):
-    id: str
-    content: str
-    approved: bool = False
-    scheduled: bool = False
+from ...models import Post
 
 class StorageService:
     def __init__(self):
