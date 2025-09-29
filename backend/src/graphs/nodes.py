@@ -1,6 +1,6 @@
 from ..api.services.gemini_service import generate_content
 from ..core.logging import logger
-from .state import ContentState
+from ..api.models.models import ContentState
 
 def generate_node(state: ContentState) -> ContentState:
     """

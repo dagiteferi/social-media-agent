@@ -7,7 +7,7 @@ from .graphs import generate_content_workflow
 from .api.services.twitter_service import schedule_post
 from .core.logging import logger
 from fastapi.middleware.cors import CORSMiddleware
-from .models import Post
+from .api.models.models import Post
 
 app = FastAPI(title="E-Commerce Social Media Agent Backend", version="1.0.0")
 storage = StorageService()

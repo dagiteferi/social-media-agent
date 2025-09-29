@@ -49,4 +49,3 @@ def generate_content(prompt: str) -> str:
             logger.error(f"Unexpected response format from Gemini API: {str(e)}")
             return "Failed to parse API response"
     return "Failed to generate content after multiple retries"
-```
