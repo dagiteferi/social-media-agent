@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from ...api.services.storage_service import StorageService
 from ...api.services.twitter_service import schedule_post
 from ...core.logging import logger
 
-router = FastAPI()
+
+router = APIRouter()
 storage = StorageService()
 
 @router.post("/schedule/{post_id}")
