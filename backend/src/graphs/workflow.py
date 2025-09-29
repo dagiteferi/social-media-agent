@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph, END
 from ..core.logging import logger
-from ..api.models.models import ContentState
+from .state import ContentState
 from .nodes import generate_node, validate_node, error_node, router
 
 async def generate_content_workflow(prompt: str) -> str:
