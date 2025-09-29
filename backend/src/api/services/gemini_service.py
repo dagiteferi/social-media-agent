@@ -18,7 +18,7 @@ def generate_content(prompt: str) -> str:
     for attempt in range(MAX_RETRIES):
         try:
             url = GEMINI_API_URL
-            params = {"key": settings.GEMINI_API_KEY}
+            params = {"key": settings.GOOGLE_API_KEY}
             json_data = {
                 "contents": [{"parts": [{"text": GENERATE_TWEET_PROMPT.format(
                     brand_name="Your E-commerce Brand",
@@ -27,7 +27,6 @@ def generate_content(prompt: str) -> str:
                     unique_benefit="unbeatable quality",
                     cta="Shop Now!"
                 )}]}],
-                "generationConfig": {"maxOutputTokens": 280},
             }
             response = requests.post(url, params=params, json=json_data, timeout=10) # Increased timeout
             response.raise_for_status()
@@ -35,13 +34,14 @@ def generate_content(prompt: str) -> str:
             logger.info(f"Generated content for prompt: {prompt}")
             return generated_text
         except requests.exceptions.RequestException as e:
-            logger.warning(f"Gemini API request failed (attempt {attempt + 1}/{MAX_RETRIES}): {str(e)}")
+            error_detail = f"Status: {e.response.status_code}, Response: {e.response.text}" if e.response else str(e)
+            logger.warning(f"Gemini API request failed (attempt {attempt + 1}/{MAX_RETRIES}): {error_detail}")
             if attempt < MAX_RETRIES - 1:
                 sleep_time = INITIAL_BACKOFF * (2 ** attempt)
                 logger.info(f"Retrying in {sleep_time} seconds...")
                 time.sleep(sleep_time)
             else:
-                logger.error(f"Gemini API request failed after {MAX_RETRIES} attempts: {str(e)}")
+                logger.error(f"Gemini API request failed after {MAX_RETRIES} attempts: {error_detail}")
                 return "Failed to generate content due to API error"
         except KeyError as e:
             logger.error(f"Unexpected response format from Gemini API: {str(e)}")

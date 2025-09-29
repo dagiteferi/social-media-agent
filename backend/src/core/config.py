@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    GEMINI_API_KEY: str
+    GOOGLE_API_KEY: str
     TWITTER_BEARER_TOKEN: str
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
