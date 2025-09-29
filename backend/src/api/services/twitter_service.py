@@ -7,6 +7,17 @@ MAX_RETRIES = 3
 INITIAL_BACKOFF = 1  # seconds
 
 def schedule_post(content: str):
+    """
+    Schedules a Twitter post using the Twitter API v2.
+
+    Includes a retry mechanism with exponential backoff for transient API errors.
+
+    Args:
+        content (str): The text content of the tweet to be scheduled.
+
+    Returns:
+        dict: The JSON response from the Twitter API if successful, or a mocked response/error message.
+    """
     for attempt in range(MAX_RETRIES):
         try:
             url = "https://api.twitter.com/2/tweets"

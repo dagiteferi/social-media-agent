@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List
 from .core.config import settings
 from .api.services.storage_service import StorageService
-from .graphs.content_graphs import generate_content_workflow
+from .graphs import generate_content_workflow
 from .api.services.twitter_service import schedule_post
 from .core.logging import logger
 from fastapi.middleware.cors import CORSMiddleware

@@ -1,9 +1,17 @@
-from langgraph.graph import StateGraph, END
 from ..api.services.gemini_service import generate_content
 from ..core.logging import logger
-from ..models import ContentState
+from .state import ContentState
 
 def generate_node(state: ContentState) -> ContentState:
+    """
+    Langgraph node to generate content using the Gemini service.
+
+    Args:
+        state (ContentState): The current state of the content generation workflow.
+
+    Returns:
+        ContentState: The updated state with generated content or an error.
+    """
     logger.info(f"Executing generate_node with prompt: {state['prompt']}")
     try:
         content = generate_content(state["prompt"])
@@ -15,6 +23,15 @@ def generate_node(state: ContentState) -> ContentState:
         return {"prompt": state["prompt"], "content": None, "error": str(e)}
 
 def validate_node(state: ContentState) -> ContentState:
+    """
+    Langgraph node to validate the generated content (e.g., character limit).
+
+    Args:
+        state (ContentState): The current state of the content generation workflow.
+
+    Returns:
+        ContentState: The updated state, potentially with an error if validation fails.
+    """
     logger.info("Executing validate_node")
     if state["content"] and len(state["content"]) <= 280:
         return state
@@ -22,28 +39,28 @@ def validate_node(state: ContentState) -> ContentState:
     return {"prompt": state["prompt"], "content": None, "error": "Content exceeds 280 characters or is empty"}
 
 def error_node(state: ContentState) -> ContentState:
+    """
+    Langgraph node to handle and log errors within the workflow.
+
+    Args:
+        state (ContentState): The current state of the content generation workflow.
+
+    Returns:
+        ContentState: The state with the error information.
+    """
     logger.info("Executing error_node")
     return state
 
 def router(state: ContentState) -> str:
+    """
+    Langgraph router to determine the next step based on the presence of an error.
+
+    Args:
+        state (ContentState): The current state of the content generation workflow.
+
+    Returns:
+        str: The name of the next node ('validate' or 'error').
+    """
     if state["error"]:
         return "error"
     return "validate"
-
-async def generate_content_workflow(prompt: str) -> str:
-    workflow = StateGraph(ContentState)
-    workflow.add_node("generate", generate_node)
-    workflow.add_node("validate", validate_node)
-    workflow.add_node("error", error_node)
-    workflow.set_entry_point("generate")
-    workflow.add_conditional_edges("generate", router, {"validate": "validate", "error": "error"})
-    workflow.add_edge("validate", END)
-    workflow.add_edge("error", END)
-
-    app = workflow.compile()
-    result = await app.ainvoke({"prompt": prompt, "content": None, "error": None})
-    
-    if result["error"]:
-        logger.error(f"Workflow failed: {result['error']}")
-        raise Exception(result["error"])
-    return result["content"]

@@ -2,6 +2,7 @@ import requests
 import time
 from ..core.config import settings
 from ..core.logging import logger
+from ...graphs.prompt_template import GENERATE_TWEET_PROMPT
 
 MAX_RETRIES = 3
 INITIAL_BACKOFF = 1  # seconds
@@ -21,7 +22,8 @@ def generate_content(prompt: str) -> str:
             url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
             params = {"key": settings.GEMINI_API_KEY}
             json_data = {
-                "contents": [{"parts": [{"text": f"Generate an engaging Twitter post for an e-commerce brand: {prompt}"}]}],
+                "contents": [{"parts": [{"text": GENERATE_TWEET_PROMPT.format(prompt=prompt)}
+]}],
                 "generationConfig": {"maxOutputTokens": 280},
             }
             response = requests.post(url, params=params, json=json_data, timeout=10) # Increased timeout
