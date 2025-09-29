@@ -1,8 +1,8 @@
 import requests
 import time
-from ...core.config import settings
-from ...core.logging import logger
-from .api_config import MAX_RETRIES, INITIAL_BACKOFF, TWITTER_API_URL, get_twitter_headers
+from core.config import settings
+from core.logging import logger
+from api_config import MAX_RETRIES, INITIAL_BACKOFF, TWITTER_API_URL, get_twitter_headers
 
 def schedule_post(content: str):
     """

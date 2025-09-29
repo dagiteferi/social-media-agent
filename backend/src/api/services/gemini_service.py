@@ -1,9 +1,9 @@
 import requests
 import time
-from ...core.config import settings
-from ...core.logging import logger
-from ...graphs.prompt_template import GENERATE_TWEET_PROMPT
-from ..api_config import MAX_RETRIES, INITIAL_BACKOFF, GEMINI_API_URL
+from core.config import settings
+from core.logging import logger
+from graphs.prompt_template import GENERATE_TWEET_PROMPT
+from api_config import MAX_RETRIES, INITIAL_BACKOFF, GEMINI_API_URL
 
 def generate_content(prompt: str) -> str:
     """

@@ -1,4 +1,4 @@
-from ...core.config import settings
+from ..core.config import settings
 
 # Retry Configuration
 MAX_RETRIES = 3
