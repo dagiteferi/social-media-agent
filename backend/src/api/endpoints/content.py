@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Optional
 from pydantic import BaseModel, Field
+from datetime import datetime
 from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...graphs import generate_content_workflow
 from ...core.logging import logger
@@ -12,7 +13,10 @@ router = APIRouter()
 
 class PromptRequest(BaseModel):
     prompt: str
-    agent_id: Optional[int] = Field(default=None) # Added optional agent_id
+    agent_id: Optional[int] = Field(default=None)
+
+class ApproveRequest(BaseModel):
+    scheduled_at: Optional[datetime] = None
 
 @router.post("/generate", response_model=Post)
 async def generate_post(request: PromptRequest, storage: PostgreSQLStorageService = Depends(get_storage_service)):
@@ -23,11 +27,10 @@ async def generate_post(request: PromptRequest, storage: PostgreSQLStorageServic
     logger.info(f"Generating post for prompt: {request.prompt}")
     try:
         content = await generate_content_workflow(request.prompt)
-        # Pass agent_id to save_post
         post_id = await storage.save_post(content, agent_id=request.agent_id)
         logger.info(f"Generated post ID: {post_id}")
-        # Ensure Post model is correctly instantiated with agent_id
-        return Post(id=post_id, content=content, approved=False, scheduled=False, agent_id=request.agent_id)
+        # Return a Post object that is valid under the new schema
+        return Post(id=post_id, content=content, approved=False, is_posted=False, agent_id=request.agent_id)
     except DatabaseOperationException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     except Exception as e:
@@ -35,13 +38,16 @@ async def generate_post(request: PromptRequest, storage: PostgreSQLStorageServic
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.post("/approve/{post_id}")
-async def approve_post(post_id: str, storage: PostgreSQLStorageService = Depends(get_storage_service)):
+async def approve_post(post_id: str, request: ApproveRequest, storage: PostgreSQLStorageService = Depends(get_storage_service)):
     """
-    Approves a generated post, making it eligible for scheduling.
+    Approves a generated post and optionally schedules it for a specific time.
     """
     try:
-        await storage.update_post(post_id, approved=True)
-        logger.info(f"Approved post ID: {post_id}")
+        await storage.update_post(post_id, approved=True, scheduled_at=request.scheduled_at)
+        if request.scheduled_at:
+            logger.info(f"Approved and scheduled post ID: {post_id} for {request.scheduled_at}")
+        else:
+            logger.info(f"Approved post ID: {post_id}")
         return {"success": True}
     except PostNotFoundException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)

@@ -7,12 +7,17 @@ from .api.endpoints import analytics, content, scheduling
 from .core.database import create_db_and_tables
 from .api.dependencies import get_storage_service
 from .core.config import settings
+from .api.services.scheduling_service import start_scheduler, stop_scheduler
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create tables on startup
     await create_db_and_tables()
+    # Start the scheduler
+    start_scheduler()
     yield
+    # Stop the scheduler
+    stop_scheduler()
 
 app = FastAPI(title="E-Commerce Social Media Agent Backend", version="1.0.0", lifespan=lifespan)
 

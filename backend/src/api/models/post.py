@@ -7,7 +7,8 @@ class Post(SQLModel, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     content: str
     approved: bool = Field(default=False)
-    scheduled: bool = Field(default=False)
+    scheduled_at: Optional[datetime] = Field(default=None, nullable=True)
+    is_posted: bool = Field(default=False)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False, sa_column_kwargs={"onupdate": datetime.utcnow})
 

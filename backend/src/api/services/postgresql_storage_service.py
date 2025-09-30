@@ -1,10 +1,11 @@
 import random
 from typing import List, Dict, Optional
+from datetime import datetime
 from sqlmodel import Session, select
 from sqlalchemy.exc import SQLAlchemyError
 from ...core.logging import logger
 from ...api.models.post import Post
-from ...api.models.models import SocialMediaAgent # Import SocialMediaAgent
+from ...api.models.models import SocialMediaAgent
 from ..exceptions import PostNotFoundException, DatabaseOperationException, AgentNotFoundException
 
 class PostgreSQLStorageService:
@@ -79,15 +80,16 @@ class PostgreSQLStorageService:
         except SQLAlchemyError as e:
             raise DatabaseOperationException(detail=f"Failed to retrieve all posts: {e}")
 
-    async def update_post(self, post_id: str, approved: Optional[bool] = None, scheduled: Optional[bool] = None, agent_id: Optional[int] = None):
+    async def update_post(self, post_id: str, approved: Optional[bool] = None, scheduled_at: Optional[datetime] = None, is_posted: Optional[bool] = None, agent_id: Optional[int] = None):
         """
-        Updates the approval, scheduled status, and/or agent of a post in the PostgreSQL database.
+        Updates the approval status, scheduled time, posted status, and/or agent of a post.
 
         Args:
             post_id (str): The ID of the post to update.
-            approved (bool, optional): New approval status. Defaults to None.
-            scheduled (bool, optional): New scheduled status. Defaults to None.
-            agent_id (Optional[int]): New agent ID. Defaults to None.
+            approved (bool, optional): New approval status.
+            scheduled_at (datetime, optional): New scheduled time.
+            is_posted (bool, optional): New posted status.
+            agent_id (Optional[int]): New agent ID.
         """
         try:
             post = await self.session.get(Post, post_id)
@@ -96,8 +98,10 @@ class PostgreSQLStorageService:
 
             if approved is not None:
                 post.approved = approved
-            if scheduled is not None:
-                post.scheduled = scheduled
+            if scheduled_at is not None:
+                post.scheduled_at = scheduled_at
+            if is_posted is not None:
+                post.is_posted = is_posted
             if agent_id is not None:
                 agent = await self.session.get(SocialMediaAgent, agent_id)
                 if not agent:
@@ -107,24 +111,10 @@ class PostgreSQLStorageService:
             self.session.add(post)
             await self.session.commit()
             await self.session.refresh(post)
-            logger.info(f"Updated post ID: {post_id} - approved: {approved}, scheduled: {scheduled}, agent_id: {agent_id}")
+            logger.info(f"Updated post ID: {post_id} - approved: {approved}, scheduled_at: {scheduled_at}, is_posted: {is_posted}, agent_id: {agent_id}")
         except SQLAlchemyError as e:
             await self.session.rollback()
             raise DatabaseOperationException(detail=f"Failed to update post: {e}")
-
-    async def get_approved_posts(self) -> List[Post]:
-        """
-        Retrieves all approved and unscheduled posts from the PostgreSQL database.
-
-        Returns:
-            List[Post]: A list of approved and unscheduled Post objects.
-        """
-        try:
-            posts = await self.session.exec(select(Post).where(Post.approved == True, Post.scheduled == False)).all()
-            logger.info(f"Retrieved {len(posts)} approved posts for scheduling from DB")
-            return posts
-        except SQLAlchemyError as e:
-            raise DatabaseOperationException(detail=f"Failed to retrieve approved posts: {e}")
 
     # Mock metrics remain as per SRS, not stored in DB
     async def get_metrics(self) -> List[Dict]:
