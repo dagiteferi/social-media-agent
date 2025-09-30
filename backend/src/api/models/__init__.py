@@ -1,1 +1,2 @@
-from .models import SocialMediaAgent, Post
+from .models import SocialMediaAgent
+from .post import Post
