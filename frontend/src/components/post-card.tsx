@@ -52,8 +52,17 @@ export function PostCard({ post, onUpdate }: PostCardProps) {
     setScheduledDate("")
   }, [schedulePost, post.id, scheduledDate])
 
-  const statusConfig = STATUS_CONFIG[post.status]
-  const platformConfig = PLATFORM_CONFIG[post.platform]
+  const statusConfig = STATUS_CONFIG[post.status] || {
+    label: post.status || "Unknown",
+    variant: "secondary" as const,
+    className: "bg-gray-500/10 text-gray-600 border-gray-500/30",
+  };
+  const platformConfig = PLATFORM_CONFIG[post.platform] || {
+    label: post.platform || "Unknown",
+    color: "text-gray-600",
+    bgColor: "bg-gray-600/10",
+    borderColor: "border-gray-600/20",
+  };
   const canApprove = post.status === "draft"
   const canSchedule = post.status === "draft" || post.status === "approved"
 
