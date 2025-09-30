@@ -10,7 +10,7 @@
 This Software Requirements Specification (SRS), compliant with IEEE 830-1998, defines the functional and non-functional requirements for an AI-driven automation system for a Social Media Manager role in the e-commerce industry (e.g., fashion retail). The system automates high-impact tasks to reduce manual effort by 50 to 60 percent and increase engagement by 250 percent, as per 1Digital Agency benchmarks. It serves as a blueprint for implementation within a 24-hour timeframe, using free-tier APIs and GCP Always Free Tier, aligning with the evaluation criteria of value proposition, automation effectiveness, technical execution, and problem-solving adaptability.
 
 ### 1.2 Scope
-The system, named **E-Commerce Social Media Agent (ESMA)**, automates content generation, post scheduling, and basic analytics for e-commerce brands on Twitter. It includes a React-based web interface for user interaction and a FastAPI backend for API orchestration, deployed on GCP Cloud Run. The agent targets repetitive tasks, saving 15 to 20 hours weekly and boosting conversions by 15 percent. Out-of-scope tasks include paid advertising, advanced crisis management, and integrations requiring paid services.
+The system, named **E-Commerce Social Media Agent (ESMA)**, automates content generation, post scheduling, and basic analytics for e-commerce brands on Twitter. It includes a React-based web interface for user interaction and a FastAPI backend for API orchestration, deployed on GCP Cloud Run with a PostgreSQL database. The agent targets repetitive tasks, saving 15 to 20 hours weekly and boosting conversions by 15 percent. Out-of-scope tasks include paid advertising, advanced crisis management, and integrations requiring paid services.
 
 ### 1.3 Definitions, Acronyms, and Abbreviations
 * **ESMA**: E-Commerce Social Media Agent.
@@ -38,12 +38,12 @@ Section 2 details the system’s context, role selection rationale, and constrai
 
 ## 2. Overall Description
 ### 2.1 Product Perspective
-ESMA is a standalone, cloud-hosted system integrating with Gemini API for content generation and Twitter API for scheduling, deployed on GCP Cloud Run. It operates within free-tier limits, ensuring accessibility. The system replaces manual content creation and scheduling, complementing human oversight for strategic tasks.
+ESMA is a standalone, cloud-hosted system integrating with Gemini API for content generation and Twitter API for scheduling, deployed on GCP Cloud Run with a PostgreSQL database. It operates within free-tier limits, ensuring accessibility. The system replaces manual content creation and scheduling, complementing human oversight for strategic tasks.
 
 ### 2.2 Product Functions
 * **Content Generation**: Creates Twitter posts from user prompts (e.g., "Promote new sneaker launch").
 * **Post Scheduling**: Queues and schedules approved posts for optimal times.
-* **Analytics Display**: Provides a dashboard with mock metrics (likes, retweets) due to free-tier limitations.
+* **Analytics Display**: Provides a dashboard with mock metrics (likes, retweets) due to free-tier limitations, with post data stored in PostgreSQL.
 * **User Interaction**: Enables prompt entry, post approval, and monitoring via a web UI.
 
 ### 2.3 User Classes and Characteristics
@@ -52,14 +52,12 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
 
 ### 2.4 Operating Environment
 * **Frontend**: Browser-based React application, compatible with Chrome, Firefox, and mobile devices.
-* **Backend**: FastAPI server in a Docker container, hosted on GCP Cloud Run.
-* **Automation**: GCP Cloud Scheduler for daily triggers.
-* **Constraints**: Free-tier APIs (Gemini: 1,500 requests/day; Twitter: 1,500 posts/month) and GCP Always Free Tier (Cloud Run: 180,000 vCPU-seconds/month; Cloud Scheduler: 3 jobs/month).
+* **Backend**: FastAPI server in a Docker container, hosted on GCP Cloud Run with a PostgreSQL database.
+* **Constraints**: Free-tier APIs (Gemini: 1,500 requests/day; Twitter: 1,500 posts/month) and GCP Always Free Tier (Cloud Run: 180,000 vCPU-seconds/month).
 
 ### 2.5 Design and Implementation Constraints
 * Must use free-tier APIs and GCP resources to avoid billing.
 * 24-hour development timeline limits scope to core automation tasks.
-* No persistent database; in-memory storage used.
 * Regional access restrictions in Ethiopia may require contacting Kidus for support.
 
 ### 2.6 Assumptions and Dependencies
@@ -82,7 +80,6 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
 * **SI-1**: Gemini API (v1beta, HTTPS POST) for content generation.
 * **SI-2**: Twitter API (v2, OAuth-authenticated POST) for scheduling and basic metrics.
 * **SI-3**: GCP Cloud Run for hosting frontend and backend.
-* **SI-4**: GCP Cloud Scheduler for daily automation triggers.
 
 #### 3.1.4 Communications Interfaces
 * HTTP/HTTPS for frontend backend communication and API calls.
@@ -99,7 +96,7 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
 #### 3.2.2 Post Scheduling (FR-2)
 * **Description**: Schedule approved posts for optimal times.
 * **Input**: Approved post ID from UI.
-* **Process**: Queue post, trigger via Twitter API, automate daily via Cloud Scheduler (8 AM EAT).
+* **Process**: Queue post, trigger via Twitter API.
 * **Output**: Scheduled post on Twitter; status update in UI.
 * **Priority**: High (saves 10 hours/week).
 
@@ -124,7 +121,6 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
 
 ### 3.4 Design Constraints
 * **DC-1**: No billing-enabled services; use GCP Always Free Tier.
-* **DC-2**: In-memory storage to avoid database costs.
 * **DC-3**: 24-hour implementation timeline.
 
 ### 3.5 Software System Attributes
@@ -137,7 +133,7 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
 * Graceful degradation if APIs are unavailable (mock responses).
 
 #### 3.5.3 Security
-* API keys stored in environment variables.
+* API keys securely managed via GCP Secret Manager and injected as environment variables.
 * No sensitive user data processed.
 
 #### 3.5.4 Maintainability
@@ -153,13 +149,6 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
 * **OR-2**: Documentation for setup and usage included in deliverables.
 
 ## 4. Supporting Information
-### 4.1 Implementation Plan
-1. **Setup (1 hour)**: Generate Gemini and Twitter API keys; configure GCP project.
-2. **Development (5 hours)**: Build FastAPI backend, React frontend, test locally.
-3. **Deployment (2 hours)**: Deploy to Cloud Run; set up Cloud Scheduler.
-4. **Testing (1 hour)**: Verify workflows, UI responsiveness, and automation.
-5. **Documentation and Video (2 hours)**: Record 5-7 minute presentation; finalize SRS.
-6. **Submission (30 minutes)**: Email deliverables to kidus@brain3.ai.
 
 ### 4.2 Assumptions
 * Access to Google AI Studio and Twitter Developer Portal.
@@ -194,11 +183,9 @@ ESMA is a standalone, cloud-hosted system integrating with Gemini API for conten
     v
 [FastAPI Backend] --> [Gemini API: Content Generation]
     |              --> [Twitter API: Post Scheduling]
-    |              --> [In-Memory Storage: Post Data]
+    |              --> [PostgreSQL Database]
     v
 [GCP Cloud Run: Hosting]
-    ^
-[GCP Cloud Scheduler: Daily Trigger]
 ```
 
 ## Appendix C: Your Notes
