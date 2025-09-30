@@ -1,8 +1,10 @@
+from fastapi import HTTPException
 from ..api.services.gemini_service import generate_content
 from ..core.logging import logger
+from ..core.config import settings
 from .state import ContentState
 
-def generate_node(state: ContentState) -> ContentState:
+async def generate_node(state: ContentState) -> ContentState:
     """
     Langgraph node to generate content using the Gemini service.
 
@@ -14,12 +16,13 @@ def generate_node(state: ContentState) -> ContentState:
     """
     logger.info(f"Executing generate_node with prompt: {state['prompt']}")
     try:
-        content = generate_content(state["prompt"])
-        if "Failed" in content:
-            return {"prompt": state["prompt"], "content": None, "error": content}
+        content = await generate_content(state["prompt"])
         return {"prompt": state["prompt"], "content": content, "error": None}
+    except HTTPException as e:
+        logger.error(f"Error in generate_node: {e.detail}")
+        return {"prompt": state["prompt"], "content": None, "error": e.detail}
     except Exception as e:
-        logger.error(f"Error in generate_node: {str(e)}")
+        logger.error(f"Unexpected error in generate_node: {str(e)}")
         return {"prompt": state["prompt"], "content": None, "error": str(e)}
 
 def validate_node(state: ContentState) -> ContentState:
@@ -33,10 +36,10 @@ def validate_node(state: ContentState) -> ContentState:
         ContentState: The updated state, potentially with an error if validation fails.
     """
     logger.info("Executing validate_node")
-    if state["content"] and len(state["content"]) <= 280:
+    if state["content"] and len(state["content"]) <= settings.TWITTER_MAX_CHARS:
         return state
-    logger.warning("Invalid content: too long or empty")
-    return {"prompt": state["prompt"], "content": None, "error": "Content exceeds 280 characters or is empty"}
+    logger.warning(f"Invalid content: too long ({len(state["content"]) if state["content"] else 0} chars) or empty")
+    return {"prompt": state["prompt"], "content": None, "error": f"Content exceeds {settings.TWITTER_MAX_CHARS} characters or is empty"}
 
 def error_node(state: ContentState) -> ContentState:
     """

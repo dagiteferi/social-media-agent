@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     CTA: str = "Shop Now!"
     GEMINI_API_TIMEOUT: int = 10
     TWITTER_API_TIMEOUT: int = 10
+    TWITTER_MAX_CHARS: int = 280
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
