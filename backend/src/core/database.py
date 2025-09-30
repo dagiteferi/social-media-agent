@@ -9,7 +9,7 @@ from .config import settings
 from .logging import logger
 
 # Use create_async_engine for async database operations
-engine = create_async_engine(settings.DATABASE_URL, echo=True, future=True)
+engine = create_async_engine(settings.DATABASE_URL, echo=settings.DATABASE_ECHO, future=True)
 
 async def create_db_and_tables():
     """

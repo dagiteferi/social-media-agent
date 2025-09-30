@@ -1,8 +1,11 @@
 import random
-from typing import List, Dict
+from typing import List, Dict, Optional
 from sqlmodel import Session, select
+from sqlalchemy.exc import SQLAlchemyError
 from ...core.logging import logger
 from ...api.models.post import Post
+from ...api.models.models import SocialMediaAgent # Import SocialMediaAgent
+from ..exceptions import PostNotFoundException, DatabaseOperationException, AgentNotFoundException
 
 class PostgreSQLStorageService:
     """
@@ -14,24 +17,33 @@ class PostgreSQLStorageService:
         self.session = session
         logger.info("Initialized PostgreSQLStorageService")
 
-    async def save_post(self, content: str) -> str:
+    async def save_post(self, content: str, agent_id: Optional[int] = None) -> str:
         """
         Saves a new post to the PostgreSQL database.
 
         Args:
             content (str): The content of the post.
+            agent_id (Optional[int]): The ID of the social media agent creating the post.
 
         Returns:
             str: The unique ID of the saved post.
         """
-        post = Post(content=content)
-        self.session.add(post)
-        await self.session.commit()
-        await self.session.refresh(post)
-        logger.info(f"Saved new post with ID: {post.id}")
-        return post.id
+        try:
+            if agent_id:
+                agent = await self.session.get(SocialMediaAgent, agent_id)
+                if not agent:
+                    raise AgentNotFoundException(agent_id=agent_id)
+            post = Post(content=content, agent_id=agent_id)
+            self.session.add(post)
+            await self.session.commit()
+            await self.session.refresh(post)
+            logger.info(f"Saved new post with ID: {post.id}")
+            return str(post.id)
+        except SQLAlchemyError as e:
+            await self.session.rollback()
+            raise DatabaseOperationException(detail=f"Failed to save post: {e}")
 
-    async def get_post(self, post_id: str) -> Post | None:
+    async def get_post(self, post_id: str) -> Post:
         """
         Retrieves a post by its ID from the PostgreSQL database.
 
@@ -39,14 +51,19 @@ class PostgreSQLStorageService:
             post_id (str): The ID of the post to retrieve.
 
         Returns:
-            Post: The Post object if found, otherwise None.
+            Post: The Post object if found.
+
+        Raises:
+            PostNotFoundException: If the post is not found.
         """
-        post = await self.session.get(Post, post_id)
-        if post:
+        try:
+            post = await self.session.get(Post, post_id)
+            if not post:
+                raise PostNotFoundException(post_id=post_id)
             logger.info(f"Retrieved post ID: {post_id}")
-        else:
-            logger.warning(f"Post ID not found: {post_id}")
-        return post
+            return post
+        except SQLAlchemyError as e:
+            raise DatabaseOperationException(detail=f"Failed to retrieve post: {e}")
 
     async def get_all_posts(self) -> List[Post]:
         """
@@ -55,31 +72,45 @@ class PostgreSQLStorageService:
         Returns:
             List[Post]: A list of all Post objects.
         """
-        posts = await self.session.exec(select(Post)).all()
-        logger.info(f"Retrieved {len(posts)} posts from DB")
-        return posts
+        try:
+            posts = await self.session.exec(select(Post)).all()
+            logger.info(f"Retrieved {len(posts)} posts from DB")
+            return posts
+        except SQLAlchemyError as e:
+            raise DatabaseOperationException(detail=f"Failed to retrieve all posts: {e}")
 
-    async def update_post(self, post_id: str, approved: bool = None, scheduled: bool = None):
+    async def update_post(self, post_id: str, approved: Optional[bool] = None, scheduled: Optional[bool] = None, agent_id: Optional[int] = None):
         """
-        Updates the approval and/or scheduled status of a post in the PostgreSQL database.
+        Updates the approval, scheduled status, and/or agent of a post in the PostgreSQL database.
 
         Args:
             post_id (str): The ID of the post to update.
             approved (bool, optional): New approval status. Defaults to None.
             scheduled (bool, optional): New scheduled status. Defaults to None.
+            agent_id (Optional[int]): New agent ID. Defaults to None.
         """
-        post = await self.session.get(Post, post_id)
-        if post:
+        try:
+            post = await self.session.get(Post, post_id)
+            if not post:
+                raise PostNotFoundException(post_id=post_id)
+
             if approved is not None:
                 post.approved = approved
             if scheduled is not None:
                 post.scheduled = scheduled
+            if agent_id is not None:
+                agent = await self.session.get(SocialMediaAgent, agent_id)
+                if not agent:
+                    raise AgentNotFoundException(agent_id=agent_id)
+                post.agent_id = agent_id
+
             self.session.add(post)
             await self.session.commit()
             await self.session.refresh(post)
-            logger.info(f"Updated post ID: {post_id} - approved: {approved}, scheduled: {scheduled}")
-        else:
-            logger.warning(f"Update failed, post ID not found: {post_id}")
+            logger.info(f"Updated post ID: {post_id} - approved: {approved}, scheduled: {scheduled}, agent_id: {agent_id}")
+        except SQLAlchemyError as e:
+            await self.session.rollback()
+            raise DatabaseOperationException(detail=f"Failed to update post: {e}")
 
     async def get_approved_posts(self) -> List[Post]:
         """
@@ -88,9 +119,12 @@ class PostgreSQLStorageService:
         Returns:
             List[Post]: A list of approved and unscheduled Post objects.
         """
-        posts = await self.session.exec(select(Post).where(Post.approved == True, Post.scheduled == False)).all()
-        logger.info(f"Retrieved {len(posts)} approved posts for scheduling from DB")
-        return posts
+        try:
+            posts = await self.session.exec(select(Post).where(Post.approved == True, Post.scheduled == False)).all()
+            logger.info(f"Retrieved {len(posts)} approved posts for scheduling from DB")
+            return posts
+        except SQLAlchemyError as e:
+            raise DatabaseOperationException(detail=f"Failed to retrieve approved posts: {e}")
 
     # Mock metrics remain as per SRS, not stored in DB
     async def get_metrics(self) -> List[Dict]:
@@ -101,11 +135,14 @@ class PostgreSQLStorageService:
             List[Dict]: A list of dictionaries, each containing 'post_id', 'likes', and 'retweets'.
         """
         # This method remains unchanged as per SRS, mock data not stored in DB
-        posts = await self.session.exec(select(Post)).all() # Need to get all post IDs for mock metrics
-        metrics = []
-        for post in posts:
-            likes = random.randint(0, 100)
-            retweets = random.randint(0, 50)
-            metrics.append({"post_id": post.id, "likes": likes, "retweets": retweets})
-        logger.info(f"Generated mock metrics for {len(metrics)} posts")
-        return metrics
+        try:
+            posts = await self.session.exec(select(Post)).all() # Need to get all post IDs for mock metrics
+            metrics = []
+            for post in posts:
+                likes = random.randint(0, 100)
+                retweets = random.randint(0, 50)
+                metrics.append({"post_id": str(post.id), "likes": likes, "retweets": retweets})
+            logger.info(f"Generated mock metrics for {len(metrics)} posts")
+            return metrics
+        except SQLAlchemyError as e:
+            raise DatabaseOperationException(detail=f"Failed to generate mock metrics: {e}")

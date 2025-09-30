@@ -2,14 +2,14 @@ from authlib.integrations.httpx_client import OAuth1Client
 from ..core.config import settings
 
 # Retry Configuration
-MAX_RETRIES = 3
-INITIAL_BACKOFF = 1  # seconds
+MAX_RETRIES = settings.MAX_RETRIES
+INITIAL_BACKOFF = settings.INITIAL_BACKOFF
 
 # Gemini API Configuration
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+GEMINI_API_URL = settings.GEMINI_API_BASE_URL
 
 # Twitter API Configuration
-TWITTER_API_URL = "https://api.twitter.com/2/tweets"
+TWITTER_API_URL = settings.TWITTER_API_BASE_URL
 
 def get_twitter_oauth1_client() -> OAuth1Client:
     return OAuth1Client(

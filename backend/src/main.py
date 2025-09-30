@@ -6,6 +6,7 @@ from sqlmodel import Session
 from .api.endpoints import analytics, content, scheduling
 from .core.database import create_db_and_tables
 from .api.dependencies import get_storage_service
+from .core.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -18,7 +19,7 @@ app = FastAPI(title="E-Commerce Social Media Agent Backend", version="1.0.0", li
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS.split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
