@@ -1,4 +1,5 @@
 import asyncio
+import time
 import httpx
 from ...core.logging import logger
 from ..api_config import MAX_RETRIES, INITIAL_BACKOFF, TWITTER_API_URL, get_twitter_oauth1_client
@@ -48,9 +49,21 @@ async def schedule_post(content: str):
             error_detail = f"Status: {e.response.status_code}, Response: {e.response.text}"
             logger.warning(f"Twitter API request failed (attempt {attempt + 1}/{MAX_RETRIES}): {error_detail}")
             if attempt < MAX_RETRIES - 1:
-                sleep_time = INITIAL_BACKOFF * (2 ** attempt)
-                logger.info(f"Retrying in {sleep_time} seconds...")
-                await asyncio.sleep(sleep_time)
+                if e.response.status_code == 429:
+                    reset_time_str = e.response.headers.get("x-rate-limit-reset")
+                    if reset_time_str:
+                        reset_time = int(reset_time_str)
+                        sleep_time = max(0, reset_time - time.time())
+                        logger.info(f"Rate limit exceeded. Retrying in {sleep_time:.2f} seconds...")
+                        await asyncio.sleep(sleep_time)
+                    else:
+                        sleep_time = INITIAL_BACKOFF * (2 ** attempt)
+                        logger.info(f"Rate limit reset time not available. Retrying in {sleep_time} seconds...")
+                        await asyncio.sleep(sleep_time)
+                else:
+                    sleep_time = INITIAL_BACKOFF * (2 ** attempt)
+                    logger.info(f"Retrying in {sleep_time} seconds...")
+                    await asyncio.sleep(sleep_time)
             else:
                 logger.error(f"Twitter API request failed after {MAX_RETRIES} attempts: {error_detail}")
                 raise TwitterAPIException(detail=f"Twitter API request failed: {error_detail}", status_code=e.response.status_code)
