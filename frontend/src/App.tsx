@@ -1,23 +1,15 @@
-import { Routes, Route } from "react-router-dom"
-import { PostsDashboard } from "@/components/posts-dashboard" // Correct import path
-import { AnalyticsDashboard } from "@/components/analytics-dashboard"
-import { Layout } from "@/components/Layout";
-import { LoadingSplash } from "@/components/ui/loading-splash"
-import { usePosts } from "@/hooks/use-posts"
+import { Routes, Route, BrowserRouter } from "react-router-dom"; // Import BrowserRouter
+import Dashboard from "@/pages/Dashboard";
+import Analytics from "@/pages/Analytics";
 
 export default function App() {
-  const { isLoading: arePostsLoading } = usePosts();
-
-  if (arePostsLoading) {
-    return <LoadingSplash />;
-  }
-
   return (
-    <Layout>
+    <BrowserRouter> {/* Wrap Routes with BrowserRouter */}
       <Routes>
-        <Route path="/" element={<PostsDashboard />} />
-        <Route path="/analytics" element={<AnalyticsDashboard />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/analytics" element={<Analytics />} />
+        {/* Add other routes as needed */}
       </Routes>
-    </Layout>
-  )
+    </BrowserRouter>
+  );
 }

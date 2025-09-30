@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PostCard } from "@/components/PostCard"; // Corrected import path
-import { GeneratePostModal } from "@/components/generate-post-modal"; // Corrected import path
+import { GeneratePostModal } from "@/components/GeneratePostModal"; // Corrected import path
 import { EmptyState } from "@/components/ui/empty-state"; // Corrected import path
 import { useToast } from "@/hooks/use-toast"; // Use useToast hook
 import type { Post } from "@/lib/types"; // Import Post type
