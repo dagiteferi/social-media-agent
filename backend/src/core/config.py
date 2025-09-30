@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     UNIQUE_BENEFIT: str = "unbeatable quality"
     CTA: str = "Shop Now!"
     GEMINI_API_TIMEOUT: int = 10
+    TWITTER_API_TIMEOUT: int = 10
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

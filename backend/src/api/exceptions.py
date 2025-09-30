@@ -20,3 +20,10 @@ class DatabaseOperationException(HTTPException):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=detail
         )
+
+class TwitterAPIException(HTTPException):
+    def __init__(self, detail: str = "Twitter API request failed", status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(
+            status_code=status_code,
+            detail=detail
+        )
