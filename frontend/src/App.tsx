@@ -1,24 +1,23 @@
 import { Routes, Route } from "react-router-dom"
-import { Toaster } from "@/components/ui/toaster"
-import { AppSidebar } from "@/components/app-sidebar"
 import { PostsDashboard } from "@/components/posts-dashboard"
 import { AnalyticsDashboard } from "@/components/analytics-dashboard"
+import { Layout } from "@/components/layout"
+import { LoadingSplash } from "@/components/ui/loading-splash" // Import LoadingSplash
+import { usePosts } from "@/hooks/use-posts" // Import usePosts hook
 
 export default function App() {
+  const { isLoading: arePostsLoading } = usePosts(); // Get loading state from usePosts
+
+  if (arePostsLoading) {
+    return <LoadingSplash />; // Show splash screen while posts are loading
+  }
+
   return (
-    <div className="flex h-screen overflow-hidden dark">
-      <aside className="w-64 flex-shrink-0 border-r border-border">
-        <AppSidebar />
-      </aside>
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-6 lg:p-8 max-w-7xl">
-          <Routes>
-            <Route path="/" element={<PostsDashboard />} />
-            <Route path="/analytics" element={<AnalyticsDashboard />} />
-          </Routes>
-        </div>
-      </main>
-      <Toaster />
-    </div>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<PostsDashboard />} />
+        <Route path="/analytics" element={<AnalyticsDashboard />} />
+      </Routes>
+    </Layout>
   )
 }
