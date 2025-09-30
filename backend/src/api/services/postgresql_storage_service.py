@@ -74,7 +74,8 @@ class PostgreSQLStorageService:
             List[Post]: A list of all Post objects.
         """
         try:
-            posts = await self.session.exec(select(Post)).all()
+            result = await self.session.execute(select(Post))
+            posts = result.scalars().all()
             logger.info(f"Retrieved {len(posts)} posts from DB")
             return posts
         except SQLAlchemyError as e:
@@ -126,7 +127,8 @@ class PostgreSQLStorageService:
         """
         # This method remains unchanged as per SRS, mock data not stored in DB
         try:
-            posts = await self.session.exec(select(Post)).all() # Need to get all post IDs for mock metrics
+            result = await self.session.execute(select(Post))
+            posts = result.scalars().all()
             metrics = []
             for post in posts:
                 likes = random.randint(0, 100)

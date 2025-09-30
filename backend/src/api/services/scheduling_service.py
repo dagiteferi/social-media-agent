@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlmodel import select
 from ...core.database import engine
 from ...core.logging import logger
 from ..models.post import Post
@@ -21,9 +22,10 @@ async def check_and_post_scheduled_posts():
     async with async_session() as session:
         try:
             now = datetime.now(timezone.utc)
-            posts_to_schedule = (await session.exec(
-                Post.select().where(Post.approved == True, Post.is_posted == False, Post.scheduled_at <= now)
-            )).all()
+            result = await session.execute(
+                select(Post).where(Post.approved == True, Post.is_posted == False, Post.scheduled_at <= now)
+            )
+            posts_to_schedule = result.scalars().all()
 
             if not posts_to_schedule:
                 logger.info("No scheduled posts to post.")
