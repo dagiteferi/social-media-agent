@@ -10,11 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import { Post } from "@/lib/types";
 
 interface GeneratePostModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPostGenerated: () => void;
+  onPostGenerated: (newPost: Post) => void;
 }
 
 export const GeneratePostModal = ({ open, onOpenChange, onPostGenerated }: GeneratePostModalProps) => {
@@ -22,7 +24,7 @@ export const GeneratePostModal = ({ open, onOpenChange, onPostGenerated }: Gener
   const [generatedContent, setGeneratedContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
-  const [currentPostId, setCurrentPostId] = useState<string | null>(null);
+  const [currentPost, setCurrentPost] = useState<Post | null>(null);
   const [step, setStep] = useState<"input" | "preview">("input");
 
   const handleGenerate = async () => {
@@ -33,34 +35,37 @@ export const GeneratePostModal = ({ open, onOpenChange, onPostGenerated }: Gener
 
     setIsGenerating(true);
     try {
-      // Simulate API call - replace with actual API endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      const mockContent = `🚀 Exciting news! ${prompt}\n\nVisit our website to learn more and take advantage of this limited-time offer. #ECommerce #SocialMedia`;
-      const mockPostId = `post-${Date.now()}`;
-      
-      setGeneratedContent(mockContent);
-      setCurrentPostId(mockPostId);
-      setStep("preview");
-      toast.success("Post generated successfully!");
-    } catch (error) {
-      toast.error("Failed to generate post");
+      const { data, error } = await api.post<Post>("/api/v1/content/generate", { prompt });
+      if (data) {
+        setGeneratedContent(data.content);
+        setCurrentPost(data);
+        setStep("preview");
+        toast.success("Post generated successfully!");
+      } else {
+        toast.error(error || "Failed to generate post");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate post");
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleApprove = async () => {
+    if (!currentPost) return;
+
     setIsApproving(true);
     try {
-      // Simulate API call - replace with actual API endpoint
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      
-      toast.success("Post approved and saved!");
-      onPostGenerated();
-      handleClose();
-    } catch (error) {
-      toast.error("Failed to approve post");
+      const { error } = await api.post(`/api/v1/content/approve/${currentPost.id}`, { approved: true });
+      if (!error) {
+        toast.success("Post approved and saved!");
+        onPostGenerated({ ...currentPost, approved: true });
+        handleClose();
+      } else {
+        toast.error(error || "Failed to approve post");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to approve post");
     } finally {
       setIsApproving(false);
     }
@@ -69,13 +74,13 @@ export const GeneratePostModal = ({ open, onOpenChange, onPostGenerated }: Gener
   const handleGenerateAgain = () => {
     setStep("input");
     setGeneratedContent("");
-    setCurrentPostId(null);
+    setCurrentPost(null);
   };
 
   const handleClose = () => {
     setPrompt("");
     setGeneratedContent("");
-    setCurrentPostId(null);
+    setCurrentPost(null);
     setStep("input");
     onOpenChange(false);
   };

@@ -1,21 +1,27 @@
-import { useState, useEffect } from "react";
-import type { Post } from "@/lib/types"; // Assuming Post type exists
+import { useState, useEffect, useCallback } from "react";
+import type { Post } from "@/lib/types";
+import { api } from "@/lib/api";
 
 export function usePosts() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      // In a real app, you would fetch data here
-      // For now, let's just set isLoading to false
-      setIsLoading(false);
-    }, 1500); // Simulate 1.5 seconds loading
-
-    return () => clearTimeout(timer);
+  const fetchPosts = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    const { data, error: fetchError } = await api.get<Post[]>("/api/v1/content/posts");
+    if (data) {
+      setPosts(data);
+    } else {
+      setError(fetchError || "Failed to fetch posts");
+    }
+    setIsLoading(false);
   }, []);
 
-  return { posts, isLoading, error, mutate: () => {} }; // mutate is a placeholder
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  return { posts, isLoading, error, mutate: fetchPosts };
 }
