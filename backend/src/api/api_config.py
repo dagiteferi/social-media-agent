@@ -1,3 +1,4 @@
+from authlib.integrations.httpx_client import OAuth1Client
 from ..core.config import settings
 
 # Retry Configuration
@@ -10,8 +11,10 @@ GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini
 # Twitter API Configuration
 TWITTER_API_URL = "https://api.twitter.com/2/tweets"
 
-def get_twitter_headers() -> dict:
-    return {
-        "Authorization": f"Bearer {settings.TWITTER_BEARER_TOKEN}",
-        "Content-Type": "application/json"
-    }
+def get_twitter_oauth1_client() -> OAuth1Client:
+    return OAuth1Client(
+        client_id=settings.TWITTER_API_KEY,
+        client_secret=settings.TWITTER_API_SECRET,
+        token=settings.TWITTER_ACCESS_TOKEN,
+        token_secret=settings.TWITTER_ACCESS_TOKEN_SECRET,
+    )

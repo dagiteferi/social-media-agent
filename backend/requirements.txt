@@ -4,6 +4,7 @@ pydantic
 pydantic-settings
 httpx
 python-dotenv
+authlib
 langgraph
 sqlmodel
 asyncpg
