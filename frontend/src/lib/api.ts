@@ -1,4 +1,4 @@
-import type { Post, GeneratePostRequest, AnalyticsData, PostStatus } from "./types"
+import type { Post, GeneratePostRequest, AnalyticsData } from "./types"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
 
@@ -23,66 +23,50 @@ async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> 
   })
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: "An error occurred" }))
-    throw new APIError(error.message || "API request failed", response.status, error)
+    const errorData = await response.json().catch(() => ({}))
+    throw new APIError(errorData.detail || "API request failed", response.status, errorData)
+  }
+
+  if (response.status === 204) {
+    return {} as T
   }
 
   return response.json()
 }
 
 export const api = {
-  // Generate a new post
   generatePost: async (data: GeneratePostRequest): Promise<Post> => {
-    return fetchAPI<Post>("/generate", {
+    const prompt = `Generate a social media post for ${data.platform}. Product context: ${data.productContext}. Target audience: ${data.targetAudience}. Tone: ${data.tone}.`
+    return fetchAPI<Post>("/api/v1/content/generate", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({ prompt }),
     })
   },
 
-  // Get all posts with optional filters
-  getPosts: async (filters?: {
-    status?: PostStatus
-    platform?: string
-    sortBy?: string
-  }): Promise<Post[]> => {
-    const params = new URLSearchParams()
-    if (filters?.status) params.append("status", filters.status)
-    if (filters?.platform) params.append("platform", filters.platform)
-    if (filters?.sortBy) params.append("sort_by", filters.sortBy)
-
-    const query = params.toString()
-    return fetchAPI<Post[]>(`/posts${query ? `?${query}` : ""}`)
+  getPosts: async (): Promise<Post[]> => {
+    return fetchAPI<Post[]>("/api/v1/content/posts")
   },
 
-  // Get a single post
+  // Note: Backend endpoint for getting a single post is not yet implemented.
   getPost: async (id: string): Promise<Post> => {
-    return fetchAPI<Post>(`/posts/${id}`)
+    return fetchAPI<Post>(`/api/v1/content/posts/${id}`)
   },
 
-  // Approve a post
-  approvePost: async (id: string): Promise<Post> => {
-    return fetchAPI<Post>(`/posts/${id}/approve`, {
+  approvePost: async (id: string, scheduledAt?: string): Promise<{ success: boolean }> => {
+    return fetchAPI<{ success: boolean }>(`/api/v1/content/approve/${id}`, {
       method: "POST",
+      body: JSON.stringify({ scheduled_at: scheduledAt }),
     })
   },
 
-  // Schedule a post
-  schedulePost: async (id: string, scheduledFor: string): Promise<Post> => {
-    return fetchAPI<Post>(`/posts/${id}/schedule`, {
-      method: "POST",
-      body: JSON.stringify({ scheduled_for: scheduledFor }),
-    })
-  },
+  // Note: Backend endpoint for deleting a post is not yet implemented.
+  // deletePost: async (id: string): Promise<void> => {
+  //   return fetchAPI<void>(`/api/v1/content/posts/${id}`, {
+  //     method: "DELETE",
+  //   })
+  // },
 
-  // Delete a post
-  deletePost: async (id: string): Promise<void> => {
-    return fetchAPI<void>(`/posts/${id}`, {
-      method: "DELETE",
-    })
-  },
-
-  // Get analytics
   getAnalytics: async (): Promise<AnalyticsData> => {
-    return fetchAPI<AnalyticsData>("/analytics")
+    return fetchAPI<AnalyticsData>("/api/v1/analytics/metrics")
   },
 }

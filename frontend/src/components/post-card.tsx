@@ -4,24 +4,13 @@ import { useState, useCallback } from "react"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Check, Clock, MoreVertical, Trash2 } from "lucide-react"
+import { Calendar, Check, Clock, MoreVertical } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import {
   Dialog,
   DialogContent,
@@ -45,10 +34,9 @@ interface PostCardProps {
 
 export function PostCard({ post, onUpdate }: PostCardProps) {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [scheduledDate, setScheduledDate] = useState("")
 
-  const { approvePost, schedulePost, deletePost, isLoading } = usePostActions({
+  const { approvePost, schedulePost, isLoading } = usePostActions({
     onSuccess: onUpdate,
   })
 
@@ -63,11 +51,6 @@ export function PostCard({ post, onUpdate }: PostCardProps) {
     setShowScheduleDialog(false)
     setScheduledDate("")
   }, [schedulePost, post.id, scheduledDate])
-
-  const handleDelete = useCallback(async () => {
-    await deletePost(post.id)
-    setShowDeleteDialog(false)
-  }, [deletePost, post.id])
 
   const statusConfig = STATUS_CONFIG[post.status]
   const platformConfig = PLATFORM_CONFIG[post.platform]
@@ -112,15 +95,6 @@ export function PostCard({ post, onUpdate }: PostCardProps) {
                   Schedule Post
                 </DropdownMenuItem>
               )}
-              {(canApprove || canSchedule) && <DropdownMenuSeparator />}
-              <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                disabled={isLoading}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Post
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
@@ -132,10 +106,10 @@ export function PostCard({ post, onUpdate }: PostCardProps) {
             <Clock className="h-3.5 w-3.5" />
             <span>{formatDate(post.createdAt)}</span>
           </div>
-          {post.scheduledFor && (
+          {post.scheduled_at && (
             <div className="flex items-center gap-1.5 text-blue-600">
               <Calendar className="h-3.5 w-3.5" />
-              <span>{formatDateTime(post.scheduledFor)}</span>
+              <span>{formatDateTime(post.scheduled_at)}</span>
             </div>
           )}
         </CardFooter>
@@ -156,7 +130,7 @@ export function PostCard({ post, onUpdate }: PostCardProps) {
                 id="schedule-date"
                 type="datetime-local"
                 value={scheduledDate}
-                onChange={(e) => setScheduledDate(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setScheduledDate(e.target.value)}
                 min={getMinDateTime()}
               />
               <p className="text-xs text-muted-foreground">Select a future date and time for publishing</p>
@@ -172,27 +146,6 @@ export function PostCard({ post, onUpdate }: PostCardProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Post</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this post? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isLoading ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   )
 }

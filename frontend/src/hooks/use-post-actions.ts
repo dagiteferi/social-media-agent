@@ -37,10 +37,10 @@ export function usePostActions({ onSuccess }: UsePostActionsOptions = {}) {
   )
 
   const schedulePost = useCallback(
-    async (postId: string, scheduledFor: string) => {
+    async (postId: string, scheduledAt: string) => {
       setIsLoading(true)
       try {
-        await api.schedulePost(postId, scheduledFor)
+        await api.approvePost(postId, scheduledAt)
         toast({
           title: "Post scheduled",
           description: "The post has been scheduled successfully",
@@ -60,34 +60,12 @@ export function usePostActions({ onSuccess }: UsePostActionsOptions = {}) {
     [toast, onSuccess],
   )
 
-  const deletePost = useCallback(
-    async (postId: string) => {
-      setIsLoading(true)
-      try {
-        await api.deletePost(postId)
-        toast({
-          title: "Post deleted",
-          description: "The post has been deleted successfully",
-        })
-        onSuccess?.()
-      } catch (error) {
-        toast({
-          title: "Failed to delete post",
-          description: error instanceof Error ? error.message : "An unexpected error occurred",
-          variant: "destructive",
-        })
-        throw error
-      } finally {
-        setIsLoading(false)
-      }
-    },
-    [toast, onSuccess],
-  )
+  // const deletePost = useCallback(...) // Backend not implemented yet
 
   return {
     approvePost,
     schedulePost,
-    deletePost,
+    // deletePost,
     isLoading,
   }
 }

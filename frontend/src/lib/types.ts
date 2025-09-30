@@ -9,7 +9,7 @@ export interface Post {
   productContext?: string
   targetAudience?: string
   tone?: string
-  scheduledFor?: string
+  scheduled_at?: string // Renamed from scheduledFor
   createdAt: string
   updatedAt: string
   imageUrl?: string
