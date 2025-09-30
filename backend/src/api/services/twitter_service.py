@@ -24,7 +24,11 @@ async def schedule_post(content: str):
     for attempt in range(MAX_RETRIES):
         try:
             url = TWITTER_API_URL
-            json_data = {"text": content}
+            # Sanitize content for Twitter API
+            sanitized_content = content.replace("[link to website]", "https://example.com").strip()
+            if len(sanitized_content) > settings.TWITTER_MAX_CHARS:
+                sanitized_content = sanitized_content[:settings.TWITTER_MAX_CHARS - 3] + "..." # Truncate and add ellipsis
+            json_data = {"text": sanitized_content}
             logger.debug(f"Sending to Twitter API: {json_data}")
             response = await client.post(url, json=json_data, timeout=settings.TWITTER_API_TIMEOUT)
             response.raise_for_status()
