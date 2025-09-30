@@ -1,19 +1,26 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import sessionmaker
+from ...core.database import engine
 from ...core.logging import logger
-from ...core.database import get_session
 from ..models.post import Post
 from . import twitter_service
+
+# Create a sessionmaker for the scheduler
+async_session = sessionmaker(
+    engine, class_=AsyncSession, expire_on_commit=False
+)
 
 async def check_and_post_scheduled_posts():
     """
     Checks for scheduled posts that are due and posts them to Twitter.
     """
     logger.info("Checking for scheduled posts...")
-    async with get_session() as session:
+    async with async_session() as session:
         try:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             posts_to_schedule = (await session.exec(
                 Post.select().where(Post.approved == True, Post.is_posted == False, Post.scheduled_at <= now)
             )).all()
