@@ -18,6 +18,9 @@ async def schedule_specific_post(post_id: str, storage: PostgreSQLStorageService
         if not post.approved:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Post is not approved")
 
+        if not post.content or not post.content.strip():
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Post content is empty or contains only whitespace.")
+
         await schedule_post(post.content)
         await storage.update_post(post_id, scheduled=True)
         logger.info(f"Scheduled post ID: {post_id}")

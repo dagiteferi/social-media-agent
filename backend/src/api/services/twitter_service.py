@@ -2,6 +2,7 @@ import asyncio
 import httpx
 from ...core.logging import logger
 from ..api_config import MAX_RETRIES, INITIAL_BACKOFF, TWITTER_API_URL, get_twitter_oauth1_client
+from ...core.config import settings
 from ..exceptions import TwitterAPIException
 
 async def schedule_post(content: str):
