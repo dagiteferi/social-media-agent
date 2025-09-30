@@ -10,14 +10,6 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
-  css: { // Add this css block
-    postcss: {
-      plugins: [
-        require('tailwindcss')('./tailwind.config.ts'), // Explicitly point to tailwind.config.ts
-        require('autoprefixer'),
-      ],
-    },
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
