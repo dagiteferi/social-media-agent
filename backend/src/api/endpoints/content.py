@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from ...api.services.postgresql_storage_service import PostgreSQLStorageService
 from ...graphs import generate_content_workflow
 from ...core.logging import logger
@@ -12,7 +12,7 @@ router = APIRouter()
 
 class PromptRequest(BaseModel):
     prompt: str
-    agent_id: Optional[int] = None # Added optional agent_id
+    agent_id: Optional[int] = Field(default=None) # Added optional agent_id
 
 @router.post("/generate", response_model=Post)
 async def generate_post(request: PromptRequest, storage: PostgreSQLStorageService = Depends(get_storage_service)):
