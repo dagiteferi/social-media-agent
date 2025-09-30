@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PostCard } from "@/components/post-card"; // Corrected import path
+import { PostCard } from "@/components/PostCard"; // Corrected import path
 import { GeneratePostModal } from "@/components/generate-post-modal"; // Corrected import path
 import { EmptyState } from "@/components/ui/empty-state"; // Corrected import path
 import { useToast } from "@/hooks/use-toast"; // Use useToast hook

@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom"
 import { PostsDashboard } from "@/components/posts-dashboard" // Correct import path
 import { AnalyticsDashboard } from "@/components/analytics-dashboard"
-import { Layout } from "@/components/layout"
+import { Layout } from "@/components/Layout";
 import { LoadingSplash } from "@/components/ui/loading-splash"
 import { usePosts } from "@/hooks/use-posts"
 
