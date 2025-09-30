@@ -1,24 +1,26 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import Dashboard from "@/pages/Dashboard";
 import Analytics from "@/pages/Analytics";
-import { Layout } from "@/components/layout"; // Import Layout
+import { Layout } from "@/components/layout"; // Import Layout component
 import { LoadingSplash } from "@/components/ui/loading-splash"; // Import LoadingSplash
 import { usePosts } from "@/hooks/use-posts"; // Import usePosts
 
 export default function App() {
-  const { isLoading: arePostsLoading } = usePosts(); // Assuming usePosts exists and provides isLoading
+  const { isLoading: arePostsLoading } = usePosts();
 
   if (arePostsLoading) {
-    return <LoadingSplash />; // Show splash screen while posts are loading
+    return <LoadingSplash />;
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/analytics" element={<Analytics />} />
-        {/* Add other routes as needed */}
-      </Routes>
-    </Layout>
+    <BrowserRouter> {/* BrowserRouter should wrap the entire app */}
+      <Layout> {/* Layout component wraps the Routes */}
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/analytics" element={<Analytics />} />
+          {/* Add other routes as needed */}
+        </Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }
