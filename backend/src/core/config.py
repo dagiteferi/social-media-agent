@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     CORS_ORIGINS: str = "*"
     DATABASE_ECHO: bool = False
-    LOG_LEVEL: str = "INFO"
+    LOG_LEVEL: str = "DEBUG"
     GEMINI_API_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
     TWITTER_API_BASE_URL: str = "https://api.twitter.com/2/tweets"
     MAX_RETRIES: int = 3

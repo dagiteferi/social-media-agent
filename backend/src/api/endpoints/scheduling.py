@@ -21,6 +21,7 @@ async def schedule_specific_post(post_id: str, storage: PostgreSQLStorageService
         if not post.content or not post.content.strip():
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Post content is empty or contains only whitespace.")
 
+        logger.debug(f"Attempting to schedule post with content: '{post.content}'")
         await schedule_post(post.content)
         await storage.update_post(post_id, scheduled=True)
         logger.info(f"Scheduled post ID: {post_id}")

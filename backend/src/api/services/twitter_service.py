@@ -25,6 +25,7 @@ async def schedule_post(content: str):
         try:
             url = TWITTER_API_URL
             json_data = {"text": content}
+            logger.debug(f"Sending to Twitter API: {json_data}")
             response = await client.post(url, json=json_data, timeout=settings.TWITTER_API_TIMEOUT)
             response.raise_for_status()
             logger.info(f"Scheduled post: {content[:50]}...")
