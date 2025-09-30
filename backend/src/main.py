@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from .api.endpoints import analytics, content, scheduling
+from .api.endpoints import analytics, content
 from .core.database import create_db_and_tables
 from .api.dependencies import get_storage_service
 from .core.config import settings
@@ -32,5 +32,4 @@ app.add_middleware(
 
 # Include routers from modularized endpoint files
 app.include_router(content.router, prefix="/api/v1/content", tags=["Content Management"])
-app.include_router(scheduling.router, prefix="/api/v1/scheduling", tags=["Scheduling"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
