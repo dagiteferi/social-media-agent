@@ -1,7 +1,7 @@
 # Research and Functional Breakdown for Social Media Manager Role in E Commerce Industry
 
 ## Executive Summary
-This document presents a comprehensive analysis of the Social Media Manager role within the e commerce sector, informed by extensive research from authoritative sources including job descriptions, industry reports, and service provider insights. As a senior engineer with experience at leading technology firms such as Amazon, Meta, Google, and X, I structured this breakdown to emphasize data driven decision making, scalable workflows, and automation opportunities. The focus is on high impact responsibilities that align with e commerce objectives, such as driving traffic, enhancing conversions, and fostering customer loyalty. Key findings indicate that effective social media management can increase engagement by 250 percent and contribute to 56 percent of revenue growth in e commerce, as evidenced by case studies from 1Digital Agency. This research serves as the foundation for designing a production ready AI automation solution, prioritizing tasks amenable to free tier APIs like Gemini and Twitter to ensure scalability and cost efficiency.
+This document presents a comprehensive analysis of the Social Media Manager role within the e commerce sector, informed by extensive research from authoritative sources including job descriptions, industry reports, and service provider insights. As a senior engineer with experience at leading technology firms such as Amazon, Meta, Google, and X, I structured this breakdown to emphasize data driven decision making, scalable workflows, and automation opportunities. The focus is on high impact responsibilities that align with e commerce objectives, such as driving traffic, enhancing conversions, and fostering customer loyalty. Key findings indicate that effective social media management can increase engagement by 250 percent and contribute to 56 percent of revenue growth in e commerce, as evidenced by case studies from 1Digital Agency. This research serves as the foundation for designing a production ready AI automation solution, prioritizing tasks amenable to free tier APIs like Gemini and Twitter, and a PostgreSQL database, to ensure scalability and cost efficiency.
 
 Sources consulted include:
 * [Indeed Social Media Manager Job Description](https://www.indeed.com/hire/job-description/social-media-manager)
@@ -97,7 +97,7 @@ Each responsibility decomposes into sub functionalities, with defined workflows 
 
 **Dependencies**:
 * Scheduling applications (Buffer, Later).
-* Platform APIs (Twitter API for direct posting).
+* Platform APIs (Twitter API for direct posting, deployed on GCP Cloud Run).
 * Audience analytics for time zone optimization.
 
 ### Analytics and Reporting
@@ -113,9 +113,7 @@ Each responsibility decomposes into sub functionalities, with defined workflows 
 4. Present to stakeholders for action.
 
 **Dependencies**:
-* Analytics APIs (Meta, Google).
-* Reporting tools (Tableau, custom dashboards).
-* E commerce tracking (UTM parameters).
+* Analytics APIs (Meta, Google). * Reporting tools (Tableau, custom dashboards). * E commerce tracking (UTM parameters). * PostgreSQL database for storing post-related metrics.
 
 ### Paid Advertising and Collaborations
 **Sub Functionalities**:
@@ -159,12 +157,12 @@ Prioritization employs a matrix evaluating impact (revenue generation) and autom
 
 | Priority | Workstreams | Rationale | Expected Impact | Source |
 |----------|-------------|-----------|-----------------|--------|
-| High | Content Creation (caption generation), Posting and Scheduling (automated queues), Basic Analytics (KPI tracking). | Represents 70 percent of engagement drivers; automatable with Gemini API for content, Twitter API for scheduling, yielding 15 to 20 hours weekly savings. | 15 percent conversion boost; 250 percent engagement growth. | [1Digital Agency](https://www.1digitalagency.com/social-media-management/) |
+| High | Content Creation (caption generation), Posting and Scheduling (automated queues), Basic Analytics (KPI tracking). | Represents 70 percent of engagement drivers; automatable with Gemini API for content, Twitter API for scheduling, and PostgreSQL for KPI tracking, yielding 15 to 20 hours weekly savings. | 15 percent conversion boost; 250 percent engagement growth. | [1Digital Agency](https://www.1digitalagency.com/social-media-management/) |
 | Medium | Community Engagement (response monitoring), Strategy Planning (calendar updates). | Enhances loyalty with 50 percent faster responses; partial automation via APIs. | 10 percent retention increase. | [Indeed](https://www.indeed.com/hire/job-description/social-media-manager) |
 | Low | Paid Ads, Crisis Management. | Requires human judgment and paid tools; low automatability in 24 hours. | Deferred for advanced phases. | [Digital Marketing Institute](https://digitalmarketinginstitute.com/blog/what-skills-do-i-need-to-be-a-social-media-manager) |
 
 ## Implementation Considerations
-For production readiness, the automation design will integrate React for user interfaces, FastAPI for backend logic, and GCP Cloud Run for deployment, ensuring fault tolerance and scalability. Metrics like 4x ROAS from 1Digital inform success criteria. This structure, drawn from my engineering tenure at Meta and Google, prioritizes modularity and data integrity.
+For production readiness, the automation design will integrate React for user interfaces, FastAPI for backend logic, a PostgreSQL database, and GCP Cloud Run for deployment, ensuring fault tolerance and scalability. Metrics like 4x ROAS from 1Digital inform success criteria. This structure, drawn from my engineering tenure at Meta and Google, prioritizes modularity and data integrity.
 
 ## Appendix: Additional Research Notes
 * Social commerce growth: Projected at 1.2 trillion USD by 2025 (Statista).
