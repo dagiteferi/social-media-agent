@@ -2,6 +2,7 @@ from langgraph.graph import StateGraph, END
 from ..core.logging import logger
 from .state import ContentState
 from .nodes import generate_node, validate_node, error_node, router
+from ..api.exceptions import ContentGenerationFailedException
 
 async def generate_content_workflow(prompt: str) -> str:
     """
@@ -14,7 +15,7 @@ async def generate_content_workflow(prompt: str) -> str:
         str: The validated generated content.
 
     Raises:
-        Exception: If the content generation workflow fails.
+        ContentGenerationFailedException: If the content generation workflow fails.
     """
     workflow = StateGraph(ContentState)
     workflow.add_node("generate", generate_node)
@@ -30,5 +31,5 @@ async def generate_content_workflow(prompt: str) -> str:
     
     if result["error"]:
         logger.error(f"Workflow failed: {result['error']}")
-        raise Exception(result["error"])
+        raise ContentGenerationFailedException(detail=result["error"])
     return result["content"]

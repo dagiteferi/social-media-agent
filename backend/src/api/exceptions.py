@@ -27,3 +27,10 @@ class TwitterAPIException(HTTPException):
             status_code=status_code,
             detail=detail
         )
+
+class ContentGenerationFailedException(HTTPException):
+    def __init__(self, detail: str = "Content generation workflow failed", status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(
+            status_code=status_code,
+            detail=detail
+        )
