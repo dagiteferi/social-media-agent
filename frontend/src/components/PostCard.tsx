@@ -3,15 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
-
-interface Post {
-  id: string;
-  content: string;
-  approved: boolean;
-  scheduled: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { Post } from "@/lib/types"; // Import Post type
 
 interface PostCardProps {
   post: Post;
@@ -23,8 +15,8 @@ interface PostCardProps {
 
 export const PostCard = ({ post, onApprove, onSchedule, onEdit, onDelete }: PostCardProps) => {
   const getStatusBadge = () => {
-    if (post.scheduled) {
-      return <Badge className="bg-primary text-primary-foreground">Scheduled</Badge>;
+    if (post.is_posted) {
+      return <Badge className="bg-primary text-primary-foreground">Posted</Badge>;
     }
     if (post.approved) {
       return <Badge className="bg-success text-success-foreground">Approved</Badge>;
@@ -75,7 +67,7 @@ export const PostCard = ({ post, onApprove, onSchedule, onEdit, onDelete }: Post
               Approve
             </Button>
           )}
-          {post.approved && !post.scheduled && (
+          {post.approved && !post.is_posted && (
             <Button
               size="sm"
               onClick={() => onSchedule(post.id)}
