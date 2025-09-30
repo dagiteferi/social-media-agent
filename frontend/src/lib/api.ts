@@ -5,10 +5,17 @@ interface ApiResponse<T> {
   error?: string;
 }
 
+const buildUrl = (path: string) => {
+  // Remove trailing slash from base and leading slash from path, then join
+  const baseUrl = API_BASE_URL.replace(/\/+$/, '');
+  const cleanPath = path.replace(/^\/+/, '');
+  return `${baseUrl}/${cleanPath}`;
+}
+
 export const api = {
-  get: async <T>(path: string): Promise<ApiResponse<T>> => {
+  get: async <T>(path:string): Promise<ApiResponse<T>> => {
     try {
-      const response = await fetch(`${API_BASE_URL}${path}`);
+      const response = await fetch(buildUrl(path));
       if (!response.ok) {
         const errorData = await response.json();
         return { error: errorData.detail || "An unknown error occurred" };
@@ -22,7 +29,7 @@ export const api = {
 
   post: async <T>(path: string, body: any): Promise<ApiResponse<T>> => {
     try {
-      const response = await fetch(`${API_BASE_URL}${path}`, {
+      const response = await fetch(buildUrl(path), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
