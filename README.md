@@ -218,12 +218,6 @@ Interact with the intuitive web interface to:
 
 Contributions are welcome! Please feel free to open issues or submit pull requests.
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
 
-Dagmawi Teferi - [Your LinkedIn/GitHub Profile] - dagmawi.teferi@example.com
-
-Project Link: [https://github.com/your-username/social-media-agent](https://github.com/your-username/social-media-agent)
