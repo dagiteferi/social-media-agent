@@ -3,7 +3,6 @@
 **Document Version**: 1.0  
 **Author**: Dagmawi Teferi, 
 **Date**: September 29, 2025  
-**Approval**: Submit to kidus@brain3.ai for validation   
 
 ## 1. Introduction
 ### 1.1 Purpose
